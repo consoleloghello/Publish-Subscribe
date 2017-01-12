@@ -1,7 +1,7 @@
     本例子摘自《javascript设计模式与开发实践》-曾探。（发布-订阅模式）
     比如要开发一个网站登录后刷新列表，头像，购物车，nav等的功能
     没有发布-订阅模式之前的代码是这样的
-    javascript
+
     login.succ(function(data){
         header.setAvatar( data.avatar );    //设置登陆后的头像
         nav.setAvatar( data.avatar );       //设置登陆后nav模块的头像
@@ -13,7 +13,6 @@
 
 
     利用发布-订阅模式开发
-    javascript
     $.ajax('http:xxx.com?login', function(data){        //登陆成功
         login.trigger( "loginSucc", data );             //发布登陆成功的消息
     });
@@ -40,10 +39,12 @@
             }
         }
     })();
+
+
     过了很久之后，又增加了登陆后刷新收货地址列表的功能
     那么只要在收货地址模块里增加监听消息的方法就可以了，
     作为登陆模块的开发者，就不需要再关心这些行为了
-    javascript
+
     var address = (function(){                      //刷新收货地址列表模块
         login.listen("loginSucc", function( obj ){
             address.refresh( obj );
