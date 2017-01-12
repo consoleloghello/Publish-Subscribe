@@ -1,17 +1,17 @@
-###/*
-###*本例子摘自《javascript设计模式与开发实践》-曾探。（发布-订阅模式）
-###*比如要开发一个网站登录后刷新列表，头像，购物车，nav等的功能
-###*没有发布-订阅模式之前的代码是这样的
-###*/
-###login.succ(function(data){
-###    header.setAvatar( data.avatar );    //设置登陆后的头像
-###    nav.setAvatar( data.avatar );       //设置登陆后nav模块的头像
-###    message.refresh();                  //刷新消息列表
-###    cart.refresh();                     //刷新购物车列表
-###});
-###/*
-###*显然，要增加新功能只能往回调函数里堆代码，不利于维护
-###*/
+/*<br>
+*本例子摘自《javascript设计模式与开发实践》-曾探。（发布-订阅模式）<br>
+*比如要开发一个网站登录后刷新列表，头像，购物车，nav等的功能<br>
+*没有发布-订阅模式之前的代码是这样的<br>
+*/<br>
+login.succ(function(data){<br>
+     header.setAvatar( data.avatar );    //设置登陆后的头像<br>
+     nav.setAvatar( data.avatar );       //设置登陆后nav模块的头像<br>
+     message.refresh();                  //刷新消息列表<br>
+    cart.refresh();                     //刷新购物车列表<br>
+});<br>
+/*<br>
+*显然，要增加新功能只能往回调函数里堆代码，不利于维护<br>
+*/<br>
 
 
 
