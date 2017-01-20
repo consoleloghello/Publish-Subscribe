@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>分时函数</title>
+        <style media="screen">
+            .container{
+                width:960px;
+                margin: 0 auto;
+                color:#333;
+                font-size: 16px;
+                line-height: 25px;
+                font-family: "Helvetica 幼圆";
+            }
+            code{
+                font-family: "consolas serif sans-serif";
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>分时函数</h1>
+            <p>
+                如果有一些操作是由用户触发的，但是会引起页面性能问题，我们就需要分时函数了。
+                比如：webQQ有1000个好友，刷新好友的时候，需要创建许多的DOM，可能会造成页面会卡顿。短时间内往页面添加大量的DOM节点显然会让浏览器吃不消，
+                我们看到的结果往往就是浏览器的卡顿甚至假死。代码如下：
+                <pre>
+                    <code>
+                        <!-- <script type="text/javascript"> -->
+                            var ary = [];
+                            for( var i = 1; i < 1000; i++ ){
+                                ary.push( i );                  //假设ary装了1000个好友的数据
+                            }
+
+                            var renderFriendList = function( data ){
+                                for( var i = 0, l = data.length; i < l; i++ ){
+                                    var div = document.createElement("div");
+                                    div.innerHTML = i;
+                                    document.body.appendChild(div);
+                                }
+                            }
+
+                            renderFriendList( ary );
+                        <!-- </script> -->
+                    </code>
+                </pre>
+            </p>
+            <p>
+                <h3>分时函数的原理</h3>
+                timeChunk函数，timeChunk函数让创建节点的工作分批进行，比如把1秒钟创建1000个节点，改为每隔200ms创建8个节点。
+                <h3>函数节流代码实现</h3>
+                timeChunk函数接受3个参数，第一个参数为创建节点时需要用到的数据，第二个参数为封装了创建节点逻辑的函数，第三个参数
+                表示每一批创建的节点的数量。具体代码如下：
+                <pre>
+                    <code>
+                        <!-- <script type="text/javascript"> -->
+                            var timeChunk = function( ary, fn, count ){
+                                var obj, t;
+                                var len = ary.length;
+                                var start = function(){
+                                    for( var i = 0; i < Math.min( count || 1, ary.length ); i++ ){
+                                        var obj = ary.shift();
+                                        fn( obj );
+                                    }
+                                };
+                                return function(){
+                                    t = setInterval(function(){
+                                        if( ary.length === 0 ){
+                                            return clearInterval( t );
+                                        }
+                                        start();
+                                    }, 200);
+                                }
+                            }
+                        <!-- </script> -->
+                    </code>
+                </pre>
+                最后，我们进行一些小测试，假设我们有1000个好友的数据，我们利用timeChunk函数，每一批只往页面中创建8个节点：
+                <pre>
+                    <code>
+                        var ary = [];
+                        for( var i = 1; i <= 1000; i++ ){
+                            ary.push( i );
+                        }
+                        var renderFriendList = timeChunk(ary, function( n ){
+                            var div = document.createElement("div");
+                            div.innerHTML = n;
+                            document.body.appendChild( div );
+                        }, 8);
+                        renderFriendList();
+                    </code>
+                </pre>
+            </p>
+        </div>
+
+
+    </body>
+</html>

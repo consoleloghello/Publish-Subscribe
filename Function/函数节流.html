@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>函数节流</title>
+        <style media="screen">
+            .container{
+                width:960px;
+                margin: 0 auto;
+                color:#333;
+                font-size: 16px;
+                line-height: 25px;
+                font-family: "Helvetica 幼圆";
+            }
+            code{
+                font-family: "consolas serif sans-serif";
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>函数节流</h1>
+            <p>
+                javascript中的函数大多数情况下由用户主动调用触发，除非是函数本身的实现不合理，否则我们一般不会遇到跟性能相关的问题。
+                但在一些少数情况下，函数的触发不是由用户直接控制的。在这些场景下，函数有可能被非常频繁的调用，而造成大的性能问题。下面
+                将列举一些这样的场景。
+                <ol>
+                    <li>window.onresize</li>
+                    <li>mousemove</li>
+                    <li>上传进度</li>
+                </ol>
+            </p>
+            <p>
+                <h3>函数节流的原理</h3>
+                上述三个情景，触发频率非常大。比如：我们在window.resize事件中打印当前浏览器窗口的高度，我们通过拖拽来改变浏览器窗口
+                的大小，打印窗口大小的工作要1秒钟进行10次，而我们实际上只需要2次，这就需要我们按时间段来忽略一些事件请求，比如确保500ms
+                只打印一次。很显然，我们可以借助setTimeout来完成这件事。
+                <h3>函数节流代码实现</h3>
+                关于函数节流的代码实现由许多版本，下面的throttle函数的原理是，将即将被执行的函数用setTimeout延迟一段时间执行。如果该次
+                延迟执行没有完成，则忽略接下来调用该函数的请求。throttle函数接受2个参数，第一个参数为需要被延迟执行的函数，第二个参数
+                为延迟执行的时间，具体代码如下：
+                <pre>
+                    <code>
+                        var throttle = function( fn, interval ){
+                            var _self = fn,                         //保存需要被延迟的函数应用
+                                timer,                              //定时器
+                                firstTime = true;                   //是否第一次调用
+
+                            return function(){
+                                var args = arguments,
+                                    _me = this;
+                                if( firstTime ){                    //如果是第一次调用，不需要延迟执行
+                                    _self.apply( _me, args );
+                                    return firstTime = false;
+                                }
+
+                                if( timer ){                        //如果定时器还在，说明前一次的延迟执行没有完成
+                                    return false;
+                                }
+
+                                timer = setTimeout(function(){      //延迟一段时间执行
+                                    clearTimeout(timer);
+                                    timer = null;
+                                    _self.apply( _me, args );
+                                }, interval || 500 );
+                            }
+                        }
+
+                        window.onresize = throttle(function(){
+                            console.log("resize");
+                        },1000);
+                    </code>
+                </pre>
+            </p>
+        </div>
+
+
+    </body>
+</html>

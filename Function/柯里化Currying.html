@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>函数柯里化</title>
+        <style media="screen">
+            .container{
+                width:960px;
+                margin: 0 auto;
+                color:#333;
+                font-size: 16px;
+                line-height: 25px;
+                font-family: "Helvetica 幼圆";
+            }
+            code{
+                font-family: "consolas serif sans-serif";
+                line-height: 18px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>函数柯里化</h1>
+            <p>
+                currying的概念最早是俄国数学家Moses Schonfinkel发明，而后由著名的逻辑学家Haskell Curry将其丰富和发展，currying由此得名。
+            </p>
+
+            <p>
+                currying又称部分求值。一个currying的函数会先接受一些参数，接受了参数后，改函数不会立即求值，
+                而是继续返回另外一个函数，刚才传入的参数在函数形成的闭包中被保存起来。待到函数被真正需要求值
+                的时候，之前传入的参数都会被一次性用于求值。
+            </p>
+
+            <p>
+                假如：我们编写计算每个月开销的函数，每天结束前，都要记录今天的花销。
+                代码如下：
+                <pre>
+                    <code>
+                        var mouthlyCost = 0;
+                        var cost = function( money ){
+                            monthlyCost += money;
+                        }
+
+                        cost( 100 );            //第一天开销
+                        cost( 200 );            //第二天开销
+                        cost( 145 );            //第三天开销
+                        cost( 234 );            //第四天开销
+                        //.....
+
+                        alert( monthlyCost );   //输出总开销
+                    </code>
+                </pre>
+            </p>
+            <p>
+                如果我们不关心每天花掉多少钱，只需要在每月的月底得到总的花销的话，其实只需要计算一次。
+                如果每个月的前29天，都保存好当天的花销，月底再进行计算。我们就需要改写代码，
+                下面不是一个完整的currying的实现，不过有助于理解其思想。代码如下：
+                <pre>
+                    <code>
+                        var cost = (function(){
+                            var args = [];
+                            return function(){
+                                if( arguments.length === 0 ){
+                                    var money = 0;
+                                    for( var i = 0, l = args.length; i < l; i++ ){
+                                        money += args[ i ];
+                                    }
+                                    return money;
+                                }else {
+                                    [].push.apply( args, arguments );
+                                }
+                            }
+                        })();
+
+                        cost( 100 );                //未真正求值
+                        cost( 200 );                //未真正求值
+                        cost( 300 );                //未真正求值
+                        console.log( cost() );      //求值并输出：600
+                    </code>
+                </pre>
+            </p>
+            <p>
+                接下来我们编写一个通用的currying function ，这个函数接受一个参数，即将要被currying的函数，
+                在这个例子里，这个函数的作用遍历本月每天的开销并求出他们的总和。代码如下：
+                <pre>
+                    <code>
+                        <!-- <script type="text/javascript"> -->
+                        var currying = function( fn ){
+                            var args = [];
+                            return function(){
+                                if( arguments.length === 0 ){
+                                    return fn.apply( this, args );
+                                }else {
+                                    [].push.apply( args, arguments );
+                                    return arguments.callee;
+                                }
+                            }
+                        }
+
+                        var cost = (function(){
+                            var money = 0;
+                            return function(){
+                                for( var i = 0,l = arguments.length; i < l; i++ ){
+                                    money += arguments[i];
+                                }
+                                return money;
+                            }
+                        })();
+
+                        var cost = currying( cost );            //转化成currying函数
+                        cost( 100 );                            //未真正求值
+                        cost( 200 );                            //未真正求值
+                        cost( 300 );                            //未真正求值
+                        alert( cost() );                        //求值并输出：600
+                        <!-- </script> -->
+                    </code>
+                </pre>
+            </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>uncurrying</title>
+        <style media="screen">
+            .container{
+                width:960px;
+                margin: 0 auto;
+                color:#333;
+                font-size: 16px;
+                line-height: 25px;
+                font-family: "Helvetica 幼圆";
+            }
+            code{
+                font-family: "consolas serif sans-serif";
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>uncurrying</h1>
+            <p>
+                javascript中当我们调用对象的某个方法的时候，其实不用关心该对象是否被设计为拥有这个方法，这是动态类型语言的特点，也是常说的鸭子类型思想。
+                同理，一个对象也未必只能使用它自身的方法，那么有什么办法可以让对象去借用一个原本不属于他的方法呢！
+                答案应该很简单：call和apply都可以完成这个需求。
+                我们常常让类数组对象去借用Array.prototype的方法，这是call和apply最常见的应用场景之一。
+
+                <pre>
+                    <code>
+                        (function(){
+                            Array.prototype.push.call( arguments, 4 );        //arguments借用Array.prototype.push方法
+                            console.log( arguments );                         //输出:[ 1, 2, 3, 4 ];
+                        })();
+                    </code>
+                </pre>
+
+            </p>
+
+
+
+            <p>
+                那么有没有把泛化this的过程提取出来呢？uncurrying就是用来解决这个问题的。uncurrying的话题
+                来自javascript之父Brendan Eich在2011年发表的一篇Twitter。以下代码是uncurrying的实现之一：
+                代码如下：
+                <pre>
+                    <code>
+                        Function.prototype.uncurrying = function(){
+                            var self = this;
+                            return function(){
+                                var obj = Array.prototype.shift.call( arguments );
+                                return self.apply( obj, arguments );
+                            }
+                        }
+                    </code>
+                </pre>
+
+
+                接下来，看看例子，就明白它有什么作用了。
+                eg：
+                <pre>
+                    <code>
+                        var push = Array.prototype.push.uncurrying();
+                        (function(){
+                            push( arguments, 4 );
+                            console.log( arguments );               //输出： [1, 2, 3, 4]
+                        })(1, 2, 3);
+                    </code>
+                </pre>
+                通过uncurrying的方式，Array.prototype.push.call变成了一个通过的push函数。这样一来，push函数的作用就和Array.prototype.push一样了，
+                同样不仅仅局限于只能操作array对象。而对于使用者而言，调用push函数的方式也显得更加简洁和意图明显了。
+
+            </p>
+        </div>
+
+    </body>
+</html>
+
+<script type="text/javascript">
+    /*
+     *函数节流
+     */
+
+
+
+
+
+
+
+</script>

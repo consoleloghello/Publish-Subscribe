@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>惰性函数</title>
+        <style media="screen">
+            .container{
+                width:960px;
+                margin: 0 auto;
+                color:#333;
+                font-size: 16px;
+                line-height: 25px;
+                font-family: "Helvetica 幼圆";
+            }
+            code{
+                font-family: "consolas serif sans-serif";
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>惰性函数</h1>
+            <p>
+                web开发中，由于浏览器差异，一些嗅探工作不可避免，比如我们需要一个在各个浏览器中能够通用的绑定函数addEvent，常见的写法如下：
+                <pre>
+                    <code>
+                        var addEvent = function( elem, type, handler ){
+                            if( window.addEventListener ){
+                                return elem.addEventListener( type, handler, false );
+                            }
+                            if( window.attachEvent ){
+                                return elem.attachEvent( "on" + type, handler );
+                            }
+                        }
+                    </code>
+                </pre>
+                这个函数的缺点是，当它每次被调用的时候都会执行里面的if条件分支，虽然执行这些if分支的开销不算大
+                但也许有一些方法可以让程序避免这些重复的执行过程。
+                第二个方案是这样的，我们把嗅探浏览器的操作提前到代码加载的时候，在代码加载的时候就立刻进行一次判断，
+                以便让addEvent返回一个包裹了正确逻辑的函数。代码如下：
+                <pre>
+                    <code>
+                        var addEvent = (function(){
+                            if( window.addEventListener ){
+                                return function( elem, type, handler ){
+                                    elem.addEventListener( type, handler, false );
+                                }
+                            }
+                            if( window.attachEvent ){
+                                return function( elem, type, handler ){
+                                    elem.attachEvent( "on" + type, handler );
+                                }
+                            }
+                        })();
+                    </code>
+                </pre>
+                目前的addEvent函数依然有个缺点，也许我们从头到尾都没有使用过addEvent函数，这样看来，前一次的浏览器嗅探
+                就是完全多余的操作，而且这也会稍微延长页面的ready时间。
+                第三种方案即是我们将要讨论的惰性加载函数方案，此时addEvent依然被声明为一个普通的函数，在函数里依然有一些
+                分支判断。但是在第一次进入条件分支之后，在函数内部会重写这个函数，重写之后的函数就是我们期望的addEvent函数
+                了，在下一次进入addEvent函数的时候，addEvent函数里不再存在条件分支语句：
+                <pre>
+                    <code>
+                        var addEvent = function( elem, type, handler){
+                            if( window.addEventListener ){
+                                addEvent = function( elem, type, handler ){
+                                    elem.addEventListener( type, handler, false );
+                                }
+                            }else if( window.attachEvent ){
+                                addEvent = function( elem, type, handler ){
+                                    elem.attachEvent( "on" + type, handler );
+                                }
+                            }
+                            addEvet(elem, type, handler);
+                        };
+
+                        var div = document.getElementById("xxx");
+                        addEvent( div, "click", function(){
+                            alert("点击了");
+                        });
+                    </code>
+                </pre>
+            </p>
+            
+        </div>
+
+
+    </body>
+</html>
